@@ -18,8 +18,8 @@ public static class WorkerJobFunction
 
         log.LogInformation($"JobItem: {jobItem}");
         
-        var cars = JsonConvert.DeserializeObject<IEnumerable<Car>>(jobItem);
-        var output = string.Join(Environment.NewLine, cars.Select(x => $"{x.Id} - {x.Make} - {x.Model}"));
+        var jobs = JsonConvert.DeserializeObject<IEnumerable<Job>>(jobItem);
+        var output = string.Join(Environment.NewLine, jobs.Select(x => $"{x.From} - {x.To}"));
         log.LogInformation(output);
     }
 }

@@ -22,35 +22,31 @@ public static class ManualJobFunction
         [Queue("batch-jobs")]IAsyncCollector<string> batchJobsQueue, 
         ILogger log)
     {
+        var numberOfMonths = 38;
+        var batchSizeInMonths = 3;
+        
         log.LogInformation("C# HTTP trigger function processed a request.");
-        
-        var batchSize = Int32.Parse(req.Query["batchSize"]);
-        
-        var cars = new List<Car>
-        {
-            new Car{ Id = 1, Make = "Dodge", Model = "Caliber" },
-            new Car{ Id = 2, Make = "GMC", Model = "Rally Wagon 1500" },
-            new Car{ Id = 3, Make = "Kia", Model = "Optima" },
-            new Car{ Id = 4, Make = "Porsche", Model = "911" },
-            new Car{ Id = 5, Make = "Mercedes", Model = "Benz,Sprinter 3500" },
-            new Car{ Id = 6, Make = "Volvo", Model = "V40" },
-            new Car{ Id = 7, Make = "Mercedes", Model = "Benz,GL-Class" },
-            new Car{ Id = 8, Make = "GMC", Model = "Sierra 3500" },
-            new Car{ Id = 9, Make = "Chevrolet", Model = "Corvette" },
-            new Car{ Id = 10, Make = "Chevrolet", Model = "Cobalt" },
-            new Car{ Id = 11, Make = "Buick", Model = "Skylark" },
-            new Car{ Id = 12, Make = "Pontiac", Model = "Safari" },
-            new Car{ Id = 13, Make = "Volvo", Model = "C30" },
-            new Car{ Id = 14, Make = "Kia", Model = "Optima" },
-            new Car{ Id = 15, Make = "Acura", Model = "TL" },
-            new Car{ Id = 16, Make = "Porsche", Model = "Cayenne" },
-            new Car{ Id = 17, Make = "Dodge", Model = "Caravan" },
-            new Car{ Id = 18, Make = "Hyundai", Model = "Sonata" },
-            new Car{ Id = 19, Make = "Ford", Model = "Mustang" },
-            new Car{ Id = 20, Make = "Subaru", Model = "Impreza" },
-        };
 
-        var batches = cars.Batch(batchSize).ToList();
+        var today = DateTime.Now;
+        var months = new List<DateTime>(); 
+        for (int i = 0; i < numberOfMonths; i++)
+        {
+            months.Add(today.AddMonths(-1 * i));
+        }
+
+        var jobs = new List<Job>();
+        foreach (var month in months)
+        {
+            var from = new DateTime(month.Year, month.Month, 1).ToString("yyyy/MM/dd");
+            var to = new DateTime(month.Year, month.Month, DateTime.DaysInMonth(month.Year, month.Month)).ToString("yyyy/MM/dd");
+            
+            jobs.Add(new Job
+            {
+                From = from, To = to
+            });
+        }
+
+        var batches = jobs.Batch(batchSizeInMonths).ToList();
 
         foreach (var batch in batches)
         {
